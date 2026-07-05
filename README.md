@@ -10,6 +10,16 @@ Everything ships in this repository — no external git clones at install time.
 
 **Repository:** [github.com/Intteger157/Callspire.Gateway-for-MikoPBX](https://github.com/Intteger157/Callspire.Gateway-for-MikoPBX)
 
+## Screenshots
+
+**Gateway admin** — PBX users, CallerIDs, Kommo mapping, AMI, trunks (`/admin`):
+
+![Callspire Web Admin — PBX Users](docs/screenshots/admin-pbx-users.png)
+
+**Web softphone** — browser dialer, WebRTC, CDR, CRM (`/softphone/`):
+
+![Callspire Web Softphone](docs/screenshots/web-softphone.png)
+
 ## Quick install
 
 On a fresh **Ubuntu 22.04+ / Debian 12+** server (root or sudo):
