@@ -1,0 +1,30 @@
+# Callspire PBX Gateway — example configuration (no secrets).
+# Copy to /etc/callspire/config.yaml and adjust paths for your MikoPBX install.
+
+host: "0.0.0.0"
+port: 8443
+
+jwt_secret: "CHANGE_ME_GENERATE_WITH_openssl_rand_hex_32"
+jwt_expire_days: 30
+service_token: ""
+service_token_mode: "off"
+
+mikopbx_docker_container: "mikopbx"
+cdr_db_path: "/var/lib/docker/volumes/mikopbx_storage/_data/usbdisk1/mikopbx/astlogs/asterisk/cdr.db"
+config_db_path: "/var/lib/docker/volumes/mikopbx_cf/_data/conf/mikopbx.db"
+recording_base: "/var/lib/docker/volumes/mikopbx_storage/_data"
+cdr_docker_db_path: ""
+
+# Optional MikoPBX REST API v3 (recommended after initial PBX setup)
+use_rest_api: false
+mikopbx_rest_url: "http://127.0.0.1"
+mikopbx_api_key: ""
+mikopbx_admin_login: ""
+mikopbx_admin_password: ""
+mikopbx_verify_ssl: false
+
+# Default admin (password: admin) — change on first login via /admin
+users:
+  - username: admin
+    password_hash: "$2b$12$97B32J6d.VyfPR.oj3LRr.SZ9tJF62rR79buujoAmffdjctLShkQi"
+    must_change_password: true

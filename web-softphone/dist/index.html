@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Callspire Web Softphone</title>
+    <script>
+      (function () {
+        var onLogin = /\/login\/?$/.test(location.pathname)
+        var theme
+        if (onLogin) {
+          theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+        } else {
+          try { theme = localStorage.getItem('callspire-theme') } catch (e) { theme = null }
+          if (theme !== 'light' && theme !== 'dark') {
+            theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'
+          }
+        }
+        document.documentElement.setAttribute('data-theme', theme)
+      })()
+    </script>
+    <link rel="icon" href="/softphone/favicon.ico" type="image/x-icon" />
+    <link rel="shortcut icon" href="/softphone/favicon.ico" type="image/x-icon" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <script type="module" crossorigin src="/softphone/assets/index-BrMs9eLv.js"></script>
+    <link rel="modulepreload" crossorigin href="/softphone/assets/jssip-Bdyy92mt.js">
+    <link rel="stylesheet" crossorigin href="/softphone/assets/index-PFfhUmZE.css">
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="/softphone/log-bootstrap.js"></script>
+  </body>
+</html>

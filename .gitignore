@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+*.pyo
+permissions.db
+kommo_store.sqlite
+kommo_jobs.sqlite
+kommo_client_uploads/
+.env
+*.bak.*

@@ -1,0 +1,20 @@
+[Unit]
+Description=Callspire PBX Gateway (MikoPBX + web softphone + Kommo)
+After=network.target docker.service
+Wants=docker.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/callspire/pbx-gateway
+Environment=PBX_GATEWAY_CONFIG=/etc/callspire/config.yaml
+Environment=SOFTPHONE_STATIC_DIR=/opt/callspire/web-softphone/dist
+Environment=SESSION_SECRET=SESSION_SECRET_PLACEHOLDER
+Environment=WEB_SOFTPHONE_ENABLED=1
+Environment=WEB_SOFTPHONE_SKIP_ROOT_REDIRECT=0
+ExecStart=/opt/callspire/venv/bin/python -m uvicorn app:app --host 0.0.0.0 --port 8443
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

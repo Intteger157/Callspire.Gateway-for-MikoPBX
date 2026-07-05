@@ -1,0 +1,23 @@
+# MikoPBX — official Docker layout (host networking required).
+# Volumes match gateway autodiscovery paths in callspire-pbx-gateway/config.py
+
+services:
+  mikopbx:
+    image: ${MIKOPBX_IMAGE:-mikopbx/mikopbx:latest}
+    container_name: ${MIKOPBX_CONTAINER:-mikopbx}
+    hostname: mikopbx
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    network_mode: host
+    environment:
+      SSH_PORT: "23"
+      ID_WWW_USER: "${ID_WWW_USER}"
+      ID_WWW_GROUP: "${ID_WWW_GROUP}"
+    volumes:
+      - ${MIKOPBX_CF_VOLUME:-mikopbx_cf}:/cf
+      - ${MIKOPBX_STORAGE_VOLUME:-mikopbx_storage}:/storage
+
+volumes:
+  mikopbx_cf:
+  mikopbx_storage:
