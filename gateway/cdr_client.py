@@ -137,6 +137,7 @@ def query_cdr(
             trunk_id = row["to_account"] or ""
             caller_id = trunk_callerids.get(trunk_id, row["src_num"] or "")
 
+            keys = row.keys()
             results.append({
                 "src_num": row["src_num"] or "",
                 "dst_num": row["dst_num"] or "",
@@ -150,10 +151,123 @@ def query_cdr(
                 "linkedid": row["linkedid"] or "",
                 "trunk": trunk_id,
                 "src_call_id": row["src_call_id"] or "",
+                "appname": (row["appname"] if "appname" in keys else "") or "",
+                "src_chan": (row["src_chan"] if "src_chan" in keys else "") or "",
+                "dst_chan": (row["dst_chan"] if "dst_chan" in keys else "") or "",
+                "from_account": (row["from_account"] if "from_account" in keys else "") or "",
             })
         return results
     finally:
         conn.close()
+
+
+def aggregate_cdr_calls(rows: list[dict], known_exts: set[str]) -> list[dict]:
+    """Collapse per-leg CDR rows into one record per call for the dashboard.
+
+    A single call (linkedid) produces several CDR legs: the originate leg,
+    Local channels, the trunk leg, queue/forward legs. The dashboard wants
+    one line per call: who (extension), which way (out/in/internal), which
+    external number, whether it was answered, how long it talked, and which
+    device the extension used (web softphone registers as ``<ext>-WS``).
+    """
+
+    def _digits(value) -> str:
+        return "".join(ch for ch in str(value or "") if ch.isdigit())
+
+    def _is_internal(num: str) -> bool:
+        n = (num or "").strip()
+        if not n:
+            return False
+        if n in known_exts or n.removesuffix("-WS") in known_exts:
+            return True
+        # Fallback when the extension list is unavailable: short numeric ids
+        # are internal, phone-length numbers are external.
+        return not known_exts and n.isdigit() and len(n) <= 5
+
+    def _device_for_ext(legs: list[dict], ext: str) -> str:
+        if not ext:
+            return "unknown"
+        ws_needle = f"/{ext}-WS-"
+        sip_needle = f"/{ext}-"
+        found_sip = False
+        for leg in legs:
+            for chan in (leg.get("src_chan") or "", leg.get("dst_chan") or ""):
+                if ws_needle in chan:
+                    return "web"
+                if sip_needle in chan and not chan.startswith("Local/"):
+                    found_sip = True
+        return "sip" if found_sip else "unknown"
+
+    groups: dict[str, list[dict]] = {}
+    order: list[str] = []
+    for i, row in enumerate(rows):
+        key = (row.get("linkedid") or "").strip() or f"__row{i}"
+        if key not in groups:
+            groups[key] = []
+            order.append(key)
+        groups[key].append(row)
+
+    calls: list[dict] = []
+    for key in order:
+        legs = groups[key]
+        # Bootstrap legs from click-to-call are noise for party detection.
+        real = [l for l in legs if (l.get("appname") or "").strip().lower() != "originate"] or legs
+
+        ext = ""
+        phone = ""
+        direction = "internal"
+        for leg in real:
+            src, dst = (leg.get("src_num") or "").strip(), (leg.get("dst_num") or "").strip()
+            src_int, dst_int = _is_internal(src), _is_internal(dst)
+            if src_int and dst and not dst_int and len(_digits(dst)) >= 6:
+                direction, ext, phone = "outgoing", src, dst
+                break
+            if dst_int and src and not src_int and len(_digits(src)) >= 6:
+                direction, ext, phone = "incoming", dst, src
+        if not ext:
+            # No external party found: internal call (or unparseable legs).
+            for leg in real:
+                src, dst = (leg.get("src_num") or "").strip(), (leg.get("dst_num") or "").strip()
+                if _is_internal(src):
+                    ext, phone = src, dst
+                    break
+            else:
+                first = real[0]
+                ext = (first.get("src_num") or "").strip()
+                phone = (first.get("dst_num") or "").strip()
+            if any((l.get("trunk") or l.get("to_account") or "").strip() for l in real):
+                direction = "outgoing"
+
+        if direction == "incoming":
+            # Credit the extension that actually answered, if any.
+            for leg in real:
+                dst = (leg.get("dst_num") or "").strip()
+                if (leg.get("disposition") or "").upper() == "ANSWERED" and _is_internal(dst):
+                    ext = dst
+                    break
+
+        answered = any((l.get("disposition") or "").upper() == "ANSWERED" for l in real)
+        billsec = max((int(l.get("billsec") or 0) for l in real), default=0)
+        duration = max((int(l.get("duration") or 0) for l in legs), default=0)
+        starts = [l.get("start") or "" for l in legs if l.get("start")]
+        trunk = next(
+            (t for t in ((l.get("trunk") or l.get("to_account") or "").strip() for l in legs) if t),
+            "",
+        )
+        ext = ext.removesuffix("-WS")
+        calls.append({
+            "linkedid": key if not key.startswith("__row") else "",
+            "start": min(starts) if starts else "",
+            "direction": direction,
+            "ext": ext,
+            "phone": phone,
+            "answered": answered,
+            "billsec": billsec if answered else 0,
+            "duration": duration,
+            "device": _device_for_ext(legs, ext),
+            "trunk": trunk,
+        })
+    return calls
 
 
 def linkedid_involves_extension(
@@ -405,6 +519,10 @@ async def query_cdr_rest(
             "linkedid": row.get("linkedid") or "",
             "trunk": trunk_id,
             "src_call_id": row.get("src_call_id") or "",
+            "appname": row.get("appname") or "",
+            "src_chan": row.get("src_chan") or "",
+            "dst_chan": row.get("dst_chan") or "",
+            "from_account": row.get("from_account") or "",
             # REST-only extras that make recording playback trivial for clients
             # which want to bypass the proxy and hit MikoPBX directly.
             "cdr_id": row.get("id"),

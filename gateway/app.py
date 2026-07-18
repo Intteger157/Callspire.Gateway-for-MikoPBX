@@ -45,6 +45,7 @@ from cdr_client import (
     linkedid_involves_extension_rest,
     find_cdr_by_linkedid_rest,
     load_trunk_callerids_rest,
+    aggregate_cdr_calls,
 )
 from config import load_config
 import permissions_db
@@ -554,6 +555,86 @@ async def get_cdr(
         raise HTTPException(502, f"CDR query error: {exc}")
 
     return {"result": True, "data": records}
+
+
+# ======================= Dashboard (admin analytics) =======================
+
+async def _extension_names() -> dict[str, str]:
+    """``ext -> display name`` for every SIP extension; {} when unavailable."""
+    try:
+        if _rest_enabled():
+            items = await miko_rest.list_extensions_for_select(type_="SIP")
+            out: dict[str, str] = {}
+            for i in items:
+                ext = str(i.get("value") or "").strip()
+                if ext:
+                    out[ext] = _strip_ext_display_name(str(i.get("name") or "")) or ext
+            return out
+        config_db = cfg["config_db_path"]
+        if not Path(config_db).exists():
+            return {}
+        conn = sqlite3.connect(f"file:{config_db}?mode=ro", uri=True)
+        conn.row_factory = sqlite3.Row
+        try:
+            rows = conn.execute(
+                "SELECT extension, description FROM m_Sip WHERE type='peer' AND disabled='0'"
+            ).fetchall()
+            return {r["extension"]: (r["description"] or r["extension"]) for r in rows}
+        finally:
+            conn.close()
+    except Exception:
+        return {}
+
+
+@app.get("/api/admin/cdr-dashboard")
+async def cdr_dashboard(
+    start_from: str | None = Query(None, alias="from", description="ISO datetime lower bound"),
+    start_to: str | None = Query(None, alias="to", description="ISO datetime upper bound"),
+    limit: int = Query(5000, ge=1, le=20000, description="Max CDR legs to scan"),
+    _admin: dict = Depends(require_admin),
+):
+    """One record per call for the admin dashboard: who called where, direction,
+    answered/talk time, and the device class (web softphone vs SIP endpoint).
+    Country resolution happens client-side from the phone prefix."""
+    ext_names = await _extension_names()
+
+    if _rest_enabled():
+        try:
+            records = await query_cdr_rest(
+                miko_rest,
+                {},
+                start_from=start_from,
+                start_to=start_to,
+                limit=limit,
+            )
+        except MikoRestError as exc:
+            raise HTTPException(502, f"MikoPBX REST CDR error: {exc.message}") from exc
+        except Exception as exc:
+            raise HTTPException(502, f"CDR query error: {exc}") from exc
+    else:
+        try:
+            records = query_cdr(
+                cdr_db_path=cfg["cdr_db_path"],
+                config_db_path=cfg["config_db_path"],
+                start_from=start_from,
+                start_to=start_to,
+                limit=limit,
+                offset=0,
+                **_cdr_docker_kwargs(),
+            )
+        except FileNotFoundError as exc:
+            raise HTTPException(500, str(exc))
+        except Exception as exc:
+            raise HTTPException(502, f"CDR query error: {exc}")
+
+    calls = aggregate_cdr_calls(records, set(ext_names))
+    return {
+        "result": True,
+        "calls": calls,
+        "extensions": ext_names,
+        "legs_scanned": len(records),
+        "truncated": len(records) >= limit,
+    }
 
 
 # ======================= Recording =======================
