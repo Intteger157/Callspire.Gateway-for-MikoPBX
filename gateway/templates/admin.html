@@ -64,6 +64,44 @@
         .kommo-user-select{margin-top:6px;max-width:220px;width:100%;padding:6px 8px;border-radius:6px;border:1px solid #3a3f55;background:#1e2130;color:#e8eaf0;font-size:12px}
         .kommo-user-select:disabled{opacity:.5;cursor:not-allowed}
 
+        /* ---------- dashboard ---------- */
+        .dash-filters{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;padding:16px 20px;margin-bottom:20px}
+        .dash-filters label{margin:0 0 5px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#6b7080}
+        .dash-filters select,.dash-filters input[type="datetime-local"]{padding:8px 10px;background:#0f1117;border:1px solid #2a2d37;border-radius:6px;color:#e4e6eb;font-size:13px;outline:none;min-width:140px;font-family:inherit}
+        .dash-filters select:focus,.dash-filters input[type="datetime-local"]:focus{border-color:#4f8cff}
+        .seg{display:inline-flex;gap:2px;padding:3px;background:#14161e;border:1px solid #2a2d37;border-radius:8px}
+        .seg button{padding:6px 12px;background:transparent;border:none;color:#8b8fa3;font-size:12px;font-weight:500;border-radius:6px;cursor:pointer;font-family:inherit}
+        .seg button:hover{color:#e4e6eb}
+        .seg button.active{background:#1e2230;color:#e4e6eb}
+        .dash-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+        .stat-tile{background:#1a1d27;border:1px solid #2a2d37;border-radius:12px;padding:14px 16px}
+        .stat-tile .lbl{font-size:12px;color:#8b8fa3;margin-bottom:6px}
+        .stat-tile .val{font-size:26px;font-weight:600;color:#e4e6eb;line-height:1.1}
+        .stat-tile .sub{font-size:12px;color:#6b7080;margin-top:4px}
+        .dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+        .dash-grid .card{margin-bottom:0;padding:18px 20px}
+        .dash-chart-card h3,.dash-grid h3{font-size:14px;font-weight:600;margin-bottom:2px}
+        .chart-sub{font-size:12px;color:#6b7080;margin-bottom:12px}
+        @media (max-width:1100px){.dash-grid{grid-template-columns:1fr}}
+        .hbar-row{display:grid;grid-template-columns:170px 1fr 90px;gap:10px;align-items:center;padding:3px 6px;border-radius:6px;cursor:pointer}
+        .hbar-row:hover{background:#1e2130}
+        .hbar-row.sel{background:#4f8cff1a}
+        .hbar-row .hl{font-size:13px;color:#c9cdd6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .hbar-track{height:16px;display:flex;align-items:center}
+        .hbar-fill{height:16px;background:#4f8cff;border-radius:0 4px 4px 0;min-width:2px}
+        .hbar-row .hv{font-size:12px;color:#e4e6eb;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+        .hbar-row .hv .pct{color:#6b7080}
+        .dcols{display:flex;align-items:flex-end;gap:2px;height:120px;margin-top:8px}
+        .dcol{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;min-width:0}
+        .dcol .bar{background:#4f8cff;border-radius:4px 4px 0 0;min-height:2px;width:100%;max-width:24px;margin:0 auto}
+        .dcol:hover .bar{background:#6da2ff}
+        .dax{display:flex;gap:2px;margin-top:6px}
+        .dax span{flex:1;text-align:center;font-size:10px;color:#6b7080;overflow:hidden;white-space:nowrap;min-width:0}
+        #dash-table th{cursor:pointer;user-select:none;white-space:nowrap}
+        #dash-table th .arr{font-size:9px;color:#4f8cff;margin-left:4px}
+        #dash-table td{white-space:nowrap}
+        .dash-empty{color:#6b7080;font-size:13px;padding:10px 0}
+
         /* ---------- table ---------- */
         table{width:100%;border-collapse:collapse;margin-top:8px}
         th,td{text-align:left;padding:10px 14px;border-bottom:1px solid #2a2d37;font-size:14px}
@@ -253,6 +291,10 @@
                     <span class="nav-chevron" aria-hidden="true">▼</span>
                 </button>
                 <div class="nav-group-body" role="group" aria-labelledby="nav-head-pbx">
+                    <button type="button" class="nav-sub" data-page="dashboard"<button type="button" class="nav-sub" data-page="dashboard" onclick="navigate('dashboard',this)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        Dashboard
+                    </button>
                     <button type="button" class="nav-sub active" data-page="users" onclick="navigate('users',this)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                         PBX Users
@@ -302,6 +344,100 @@
     </nav>
 
     <div class="main">
+
+        <!-- ==================== DASHBOARD ==================== -->
+        <div id="page-dashboard" class="page">
+            <h2>Dashboard</h2>
+            <p class="subtitle">Call analytics from MikoPBX CDR — who called where, by country and device.</p>
+
+            <div class="card dash-filters">
+                <div>
+                    <label>Period</label>
+                    <div class="seg" id="dash-period-seg">
+                        <button type="button" onclick="dashSetPeriod(1,this)">Today</button>
+                        <button type="button" class="active" onclick="dashSetPeriod(7,this)">7 days</button>
+                        <button type="button" onclick="dashSetPeriod(30,this)">30 days</button>
+                        <button type="button" onclick="dashSetPeriod(0,this)">Custom</button>
+                    </div>
+                </div>
+                <div id="dash-custom-range" class="hidden" style="display:flex;gap:8px;align-items:flex-end">
+                    <div><label>From</label><input type="datetime-local" id="dash-from"></div>
+                    <div><label>To</label><input type="datetime-local" id="dash-to"></div>
+                    <button type="button" class="btn btn-sm" onclick="loadDashboard()">Apply</button>
+                </div>
+                <div><label>User</label><select id="dash-f-ext" onchange="dashApplyFilters()"><option value="">All users</option></select></div>
+                <div><label>Direction</label><select id="dash-f-dir" onchange="dashApplyFilters()">
+                    <option value="">All</option>
+                    <option value="outgoing">Outgoing</option>
+                    <option value="incoming">Incoming</option>
+                    <option value="internal">Internal</option>
+                </select></div>
+                <div><label>Device</label><select id="dash-f-dev" onchange="dashApplyFilters()">
+                    <option value="">All</option>
+                    <option value="web">Web softphone (PC)</option>
+                    <option value="sip">SIP device / mobile</option>
+                    <option value="unknown">Unknown</option>
+                </select></div>
+                <div><label>Country</label><select id="dash-f-country" onchange="dashApplyFilters()"><option value="">All countries</option></select></div>
+                <div style="margin-left:auto;display:flex;gap:8px">
+                    <button type="button" class="btn btn-outline btn-sm" onclick="dashResetFilters()">Reset</button>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="loadDashboard()">&#10227; Refresh</button>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="dashExportCsv()">Export CSV</button>
+                </div>
+            </div>
+
+            <div id="dash-status"></div>
+            <div class="dash-tiles" id="dash-tiles"></div>
+
+            <div class="card dash-chart-card" style="padding:18px 20px">
+                <h3>Calls per day</h3>
+                <div class="chart-sub" id="dash-daily-sub">Total calls in the filtered slice</div>
+                <div id="dash-daily"></div>
+            </div>
+
+            <div class="dash-grid">
+                <div class="card">
+                    <h3>Top users</h3>
+                    <div class="chart-sub">Calls per extension &middot; % answered &mdash; click a bar to filter</div>
+                    <div id="dash-users"></div>
+                </div>
+                <div class="card">
+                    <h3>Countries</h3>
+                    <div class="chart-sub">External calls by destination / origin country &mdash; click to filter</div>
+                    <div id="dash-countries"></div>
+                </div>
+                <div class="card">
+                    <h3>Devices</h3>
+                    <div class="chart-sub">How calls were placed / taken (web softphone registers as ext-WS)</div>
+                    <div id="dash-devices"></div>
+                </div>
+                <div class="card">
+                    <h3>Talk time by user</h3>
+                    <div class="chart-sub">Answered talk time per extension &mdash; click to filter</div>
+                    <div id="dash-talk"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="font-size:14px;font-weight:600;margin-bottom:8px">Calls</h3>
+                <div style="overflow-x:auto">
+                    <table id="dash-table">
+                        <thead><tr>
+                            <th onclick="dashSortBy('start')">Time<span class="arr" id="arr-start"></span></th>
+                            <th onclick="dashSortBy('ext')">User<span class="arr" id="arr-ext"></span></th>
+                            <th onclick="dashSortBy('direction')">Direction<span class="arr" id="arr-direction"></span></th>
+                            <th onclick="dashSortBy('phone')">Number<span class="arr" id="arr-phone"></span></th>
+                            <th onclick="dashSortBy('country')">Country<span class="arr" id="arr-country"></span></th>
+                            <th onclick="dashSortBy('device')">Device<span class="arr" id="arr-device"></span></th>
+                            <th onclick="dashSortBy('answered')">Status<span class="arr" id="arr-answered"></span></th>
+                            <th onclick="dashSortBy('billsec')">Talk<span class="arr" id="arr-billsec"></span></th>
+                        </tr></thead>
+                        <tbody id="dash-tbody"></tbody>
+                    </table>
+                </div>
+                <div id="dash-table-foot" class="dash-empty"></div>
+            </div>
+        </div>
 
         <!-- ==================== SETTINGS: AMI (MikoPBX) ==================== -->
         <div id="page-settings-ami" class="page">
@@ -777,6 +913,8 @@ function navigate(page, btn, opts) {
         loadJwtConfig();
     } else if (page === 'settings-kommo') {
         loadKommoConfig();
+    } else if (page === 'dashboard') {
+        if (!dashCalls.length) loadDashboard();
     }
     // Trunks page needs a live SIP peer status feed; stop it elsewhere so we
     // don't hit MikoPBX from background tabs the admin isn't looking at.
@@ -795,7 +933,7 @@ function applyHashRoute() {
         raw = 'settings-ami';
         try { if (history.replaceState) history.replaceState(null, '', '#settings-ami'); } catch (_) { /* ignore */ }
     }
-    const allowed = ['users', 'numbers', 'trunks', 'softphone-accounts', 'settings-ami', 'settings-auth', 'settings-kommo', 'settings-webrtc'];
+    const allowed = ['dashboard', 'users', 'numbers', 'trunks', 'softphone-accounts', 'settings-ami', 'settings-auth', 'settings-kommo', 'settings-webrtc'];
     const page = allowed.includes(raw) ? raw : 'users';
     const cur = document.querySelector('.page.active');
     if (cur && cur.id === 'page-' + page) return;
@@ -2323,6 +2461,414 @@ async function saveSoftphoneAccountEdit() {
     } catch (e) {
         if (status) status.innerHTML = '<span class="error-msg">' + escHtml(e.message) + '</span>';
     }
+}
+
+// ==================== Dashboard ====================
+let dashCalls = [];        // aggregated one-per-call records from the server
+let dashExtNames = {};     // ext -> display name
+let dashPeriodDays = 7;    // 0 = custom range
+let dashSort = { key: 'start', dir: -1 };
+let dashLoading = false;
+let dashChartData = { users: [], countries: [], talk: [] };
+
+// Calling code -> ISO region. Codes 1 (US/CA) and 7 (RU/KZ) are special-cased
+// in dashCountry(). Country display names come from Intl.DisplayNames.
+const DASH_DIAL = {
+    '20':'EG','27':'ZA','30':'GR','31':'NL','32':'BE','33':'FR','34':'ES','36':'HU','39':'IT','40':'RO','41':'CH','43':'AT','44':'GB','45':'DK','46':'SE','47':'NO','48':'PL','49':'DE',
+    '51':'PE','52':'MX','53':'CU','54':'AR','55':'BR','56':'CL','57':'CO','58':'VE','60':'MY','61':'AU','62':'ID','63':'PH','64':'NZ','65':'SG','66':'TH',
+    '81':'JP','82':'KR','84':'VN','86':'CN','90':'TR','91':'IN','92':'PK','93':'AF','94':'LK','95':'MM','98':'IR',
+    '211':'SS','212':'MA','213':'DZ','216':'TN','218':'LY','220':'GM','221':'SN','222':'MR','223':'ML','224':'GN','225':'CI','226':'BF','227':'NE','228':'TG','229':'BJ',
+    '230':'MU','231':'LR','232':'SL','233':'GH','234':'NG','235':'TD','236':'CF','237':'CM','238':'CV','239':'ST','240':'GQ','241':'GA','242':'CG','243':'CD','244':'AO','245':'GW','248':'SC','249':'SD',
+    '250':'RW','251':'ET','252':'SO','253':'DJ','254':'KE','255':'TZ','256':'UG','257':'BI','258':'MZ','260':'ZM','261':'MG','262':'RE','263':'ZW','264':'NA','265':'MW','266':'LS','267':'BW','268':'SZ','269':'KM',
+    '291':'ER','297':'AW','298':'FO','299':'GL',
+    '350':'GI','351':'PT','352':'LU','353':'IE','354':'IS','355':'AL','356':'MT','357':'CY','358':'FI','359':'BG',
+    '370':'LT','371':'LV','372':'EE','373':'MD','374':'AM','375':'BY','376':'AD','377':'MC','378':'SM','380':'UA','381':'RS','382':'ME','383':'XK','385':'HR','386':'SI','387':'BA','389':'MK',
+    '420':'CZ','421':'SK','423':'LI',
+    '501':'BZ','502':'GT','503':'SV','504':'HN','505':'NI','506':'CR','507':'PA','509':'HT',
+    '591':'BO','592':'GY','593':'EC','595':'PY','597':'SR','598':'UY','599':'CW',
+    '670':'TL','673':'BN','674':'NR','675':'PG','676':'TO','677':'SB','678':'VU','679':'FJ','680':'PW','682':'CK','685':'WS','686':'KI','687':'NC','689':'PF',
+    '850':'KP','852':'HK','853':'MO','855':'KH','856':'LA','880':'BD','886':'TW',
+    '960':'MV','961':'LB','962':'JO','963':'SY','964':'IQ','965':'KW','966':'SA','967':'YE','968':'OM','970':'PS','971':'AE','972':'IL','973':'BH','974':'QA','975':'BT','976':'MN','977':'NP',
+    '992':'TJ','993':'TM','994':'AZ','995':'GE','996':'KG','998':'UZ'
+};
+
+let _dashRegionNames = null;
+function dashRegion(iso, labelOverride) {
+    if (_dashRegionNames === null) {
+        try { _dashRegionNames = new Intl.DisplayNames(['en'], { type: 'region' }); }
+        catch (_) { _dashRegionNames = false; }
+    }
+    let label = labelOverride || iso;
+    if (!labelOverride && _dashRegionNames) {
+        try { label = _dashRegionNames.of(iso) || iso; } catch (_) { /* keep iso */ }
+    }
+    const flag = iso && iso.length === 2 && iso !== 'XK'
+        ? String.fromCodePoint(...[...iso].map((c) => 0x1F1A5 + c.charCodeAt(0)))
+        : '\u{1F310}';
+    return { iso, label, flag };
+}
+
+/** Resolve a phone number to a country, or null for internal/short numbers. */
+function dashCountry(phone) {
+    let d = String(phone || '').replace(/\D/g, '');
+    if (!d) return null;
+    if (d.startsWith('00')) d = d.slice(2);
+    if (d.startsWith('810')) d = d.slice(3);            // RU international dial-out prefix
+    if (d.length === 11 && d[0] === '8') d = '7' + d.slice(1); // RU domestic format
+    if (d.length < 7) return null;                       // extension-sized, not a phone
+    if (d[0] === '7') return dashRegion((d[1] === '6' || d[1] === '7') ? 'KZ' : 'RU');
+    if (d[0] === '1') return dashRegion('US', 'USA / Canada');
+    for (let len = 3; len >= 2; len--) {
+        const iso = DASH_DIAL[d.slice(0, len)];
+        if (iso) return dashRegion(iso);
+    }
+    return { iso: '', label: 'Unknown', flag: '\u{1F310}' };
+}
+
+const DASH_DEVICE_LABELS = { web: 'Web softphone (PC)', sip: 'SIP device / mobile', unknown: 'Unknown' };
+const DASH_DIR_LABELS = { outgoing: '↗ Out', incoming: '↙ In', internal: '⇄ Internal' };
+
+function dashFmtDur(sec) {
+    sec = Math.max(0, Math.round(sec || 0));
+    const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    if (h) return h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    return m + ':' + String(s).padStart(2, '0');
+}
+function dashFmtHours(sec) {
+    sec = Math.max(0, sec || 0);
+    if (sec < 3600) return Math.round(sec / 60) + ' min';
+    return (sec / 3600).toFixed(1) + ' h';
+}
+function dashLocalIso(dt) {
+    const p = (n) => String(n).padStart(2, '0');
+    return dt.getFullYear() + '-' + p(dt.getMonth() + 1) + '-' + p(dt.getDate()) +
+        'T' + p(dt.getHours()) + ':' + p(dt.getMinutes()) + ':' + p(dt.getSeconds());
+}
+
+function dashSetPeriod(days, btn) {
+    dashPeriodDays = days;
+    document.querySelectorAll('#dash-period-seg button').forEach((b) => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    const custom = document.getElementById('dash-custom-range');
+    if (days === 0) {
+        custom.classList.remove('hidden');
+        if (!document.getElementById('dash-from').value) {
+            const from = new Date(); from.setDate(from.getDate() - 7); from.setHours(0, 0, 0, 0);
+            document.getElementById('dash-from').value = dashLocalIso(from).slice(0, 16);
+            document.getElementById('dash-to').value = dashLocalIso(new Date()).slice(0, 16);
+        }
+        return; // user presses Apply
+    }
+    custom.classList.add('hidden');
+    loadDashboard();
+}
+
+function dashRange() {
+    if (dashPeriodDays === 0) {
+        return {
+            from: (document.getElementById('dash-from').value || '').trim(),
+            to: (document.getElementById('dash-to').value || '').trim(),
+        };
+    }
+    const from = new Date();
+    if (dashPeriodDays === 1) from.setHours(0, 0, 0, 0);
+    else { from.setDate(from.getDate() - dashPeriodDays); from.setHours(0, 0, 0, 0); }
+    return { from: dashLocalIso(from), to: '' };
+}
+
+async function loadDashboard() {
+    if (dashLoading) return;
+    dashLoading = true;
+    const statusEl = document.getElementById('dash-status');
+    statusEl.innerHTML = '<div class="dash-empty">Loading CDR…</div>';
+    try {
+        const r = dashRange();
+        let qs = '?limit=10000';
+        if (r.from) qs += '&from=' + encodeURIComponent(r.from);
+        if (r.to) qs += '&to=' + encodeURIComponent(r.to);
+        const data = await api('GET', '/api/admin/cdr-dashboard' + qs);
+        dashExtNames = data.extensions || {};
+        dashCalls = (data.calls || []).map((c) => {
+            c.country = dashCountry(c.phone);
+            c.extName = dashExtNames[c.ext] || '';
+            return c;
+        });
+        statusEl.innerHTML = data.truncated
+            ? '<div class="dash-empty" style="color:#ff9f43">Showing the most recent ' + data.legs_scanned + ' CDR legs only — narrow the period for complete numbers.</div>'
+            : '';
+        dashFillSelects();
+        dashApplyFilters();
+    } catch (e) {
+        statusEl.innerHTML = '<span class="error-msg">' + escHtml(e.message) + '</span>';
+    } finally {
+        dashLoading = false;
+    }
+}
+
+function dashFillSelects() {
+    const extSel = document.getElementById('dash-f-ext');
+    const keepExt = extSel.value;
+    const exts = [...new Set(dashCalls.map((c) => c.ext).filter(Boolean))].sort();
+    extSel.innerHTML = '<option value="">All users</option>' + exts.map((e) => {
+        const name = dashExtNames[e] ? e + ' — ' + dashExtNames[e] : e;
+        return '<option value="' + escAttr(e) + '">' + escHtml(name) + '</option>';
+    }).join('');
+    if (exts.includes(keepExt)) extSel.value = keepExt;
+
+    const cSel = document.getElementById('dash-f-country');
+    const keepC = cSel.value;
+    const countries = [...new Set(dashCalls.map((c) => c.country && c.country.label).filter(Boolean))].sort();
+    cSel.innerHTML = '<option value="">All countries</option>' + countries.map((c) =>
+        '<option value="' + escAttr(c) + '">' + escHtml(c) + '</option>').join('');
+    if (countries.includes(keepC)) cSel.value = keepC;
+}
+
+function dashFiltered() {
+    const ext = document.getElementById('dash-f-ext').value;
+    const dir = document.getElementById('dash-f-dir').value;
+    const dev = document.getElementById('dash-f-dev').value;
+    const country = document.getElementById('dash-f-country').value;
+    return dashCalls.filter((c) =>
+        (!ext || c.ext === ext) &&
+        (!dir || c.direction === dir) &&
+        (!dev || c.device === dev) &&
+        (!country || (c.country && c.country.label === country)));
+}
+
+function dashResetFilters() {
+    ['dash-f-ext', 'dash-f-dir', 'dash-f-dev', 'dash-f-country'].forEach((id) => { document.getElementById(id).value = ''; });
+    dashApplyFilters();
+}
+
+function dashApplyFilters() {
+    const calls = dashFiltered();
+    dashRenderTiles(calls);
+    dashRenderDaily(calls);
+    dashRenderUsers(calls);
+    dashRenderCountries(calls);
+    dashRenderDevices(calls);
+    dashRenderTalk(calls);
+    dashRenderTable(calls);
+}
+
+function dashRenderTiles(calls) {
+    const total = calls.length;
+    const answered = calls.filter((c) => c.answered).length;
+    const talk = calls.reduce((s, c) => s + (c.billsec || 0), 0);
+    const users = new Set(calls.map((c) => c.ext).filter(Boolean)).size;
+    const countries = new Set(calls.map((c) => c.country && c.country.label).filter(Boolean)).size;
+    const pct = total ? Math.round(answered * 100 / total) : 0;
+    const tile = (lbl, val, sub) =>
+        '<div class="stat-tile"><div class="lbl">' + lbl + '</div><div class="val">' + val + '</div>' +
+        (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div>';
+    document.getElementById('dash-tiles').innerHTML =
+        tile('Total calls', total.toLocaleString(), '') +
+        tile('Answered', pct + '%', answered.toLocaleString() + ' of ' + total.toLocaleString()) +
+        tile('Talk time', dashFmtHours(talk), 'answered calls only') +
+        tile('Active users', users, '') +
+        tile('Countries', countries, 'external calls');
+}
+
+function dashRenderDaily(calls) {
+    const el = document.getElementById('dash-daily');
+    if (!calls.length) { el.innerHTML = '<div class="dash-empty">No calls in the selected period.</div>'; return; }
+    const byDay = {};
+    calls.forEach((c) => {
+        const d = (c.start || '').slice(0, 10);
+        if (!d) return;
+        (byDay[d] = byDay[d] || { total: 0, answered: 0 }).total++;
+        if (c.answered) byDay[d].answered++;
+    });
+    const days = Object.keys(byDay).sort();
+    // Fill gaps so quiet days show as gaps in activity, not missing columns.
+    const all = [];
+    if (days.length) {
+        const cur = new Date(days[0] + 'T00:00:00');
+        const last = new Date(days[days.length - 1] + 'T00:00:00');
+        while (cur <= last) {
+            all.push(dashLocalIso(cur).slice(0, 10));
+            cur.setDate(cur.getDate() + 1);
+        }
+    }
+    const max = Math.max(...all.map((d) => (byDay[d] || { total: 0 }).total), 1);
+    const showLabel = Math.max(1, Math.ceil(all.length / 14));
+    el.innerHTML =
+        '<div class="dcols">' + all.map((d) => {
+            const v = byDay[d] || { total: 0, answered: 0 };
+            const h = Math.round(v.total * 100 / max);
+            return '<div class="dcol" title="' + escAttr(d + ': ' + v.total + ' calls, ' + v.answered + ' answered') + '">' +
+                '<div class="bar" style="height:' + Math.max(v.total ? 2 : 0, h) + '%"></div></div>';
+        }).join('') + '</div>' +
+        '<div class="dax">' + all.map((d, i) =>
+            '<span>' + (i % showLabel === 0 ? d.slice(5) : '') + '</span>').join('') + '</div>';
+}
+
+/** Shared horizontal single-hue bar list. items: {key,label,value,valueHtml,title,selected} */
+function dashHBars(el, items, clickChart) {
+    if (!items.length) { el.innerHTML = '<div class="dash-empty">No data for the current filters.</div>'; return; }
+    const max = Math.max(...items.map((i) => i.value), 1);
+    el.innerHTML = items.map((i, idx) =>
+        '<div class="hbar-row' + (i.selected ? ' sel' : '') + '" title="' + escAttr(i.title || '') + '"' +
+        (clickChart ? ' onclick="dashBarClick(\'' + clickChart + '\',' + idx + ')"' : '') + '>' +
+        '<div class="hl">' + i.label + '</div>' +
+        '<div class="hbar-track"><div class="hbar-fill" style="width:' + Math.max(2, i.value * 100 / max) + '%"></div></div>' +
+        '<div class="hv">' + i.valueHtml + '</div></div>').join('');
+}
+
+function dashBarClick(chart, idx) {
+    const item = (dashChartData[chart] || [])[idx];
+    if (!item) return;
+    const sel = document.getElementById(item.filterId);
+    sel.value = (sel.value === item.filterValue) ? '' : item.filterValue;
+    dashApplyFilters();
+}
+
+function dashRenderUsers(calls) {
+    const byExt = {};
+    calls.forEach((c) => {
+        if (!c.ext) return;
+        const b = byExt[c.ext] = byExt[c.ext] || { calls: 0, answered: 0 };
+        b.calls++; if (c.answered) b.answered++;
+    });
+    const selected = document.getElementById('dash-f-ext').value;
+    const items = Object.entries(byExt)
+        .sort((a, b) => b[1].calls - a[1].calls).slice(0, 12)
+        .map(([ext, v]) => ({
+            label: escHtml(dashExtNames[ext] ? ext + ' · ' + dashExtNames[ext] : ext),
+            value: v.calls,
+            valueHtml: v.calls + ' <span class="pct">· ' + Math.round(v.answered * 100 / v.calls) + '%</span>',
+            title: ext + (dashExtNames[ext] ? ' ' + dashExtNames[ext] : '') + ': ' + v.calls + ' calls, ' + v.answered + ' answered',
+            selected: ext === selected,
+            filterId: 'dash-f-ext', filterValue: ext,
+        }));
+    dashChartData.users = items;
+    dashHBars(document.getElementById('dash-users'), items, 'users');
+}
+
+function dashRenderCountries(calls) {
+    const byC = {};
+    calls.forEach((c) => {
+        if (!c.country) return;
+        const b = byC[c.country.label] = byC[c.country.label] || { calls: 0, answered: 0, flag: c.country.flag };
+        b.calls++; if (c.answered) b.answered++;
+    });
+    const selected = document.getElementById('dash-f-country').value;
+    const items = Object.entries(byC)
+        .sort((a, b) => b[1].calls - a[1].calls).slice(0, 12)
+        .map(([label, v]) => ({
+            label: v.flag + ' ' + escHtml(label),
+            value: v.calls,
+            valueHtml: v.calls + ' <span class="pct">· ' + Math.round(v.answered * 100 / v.calls) + '%</span>',
+            title: label + ': ' + v.calls + ' calls, ' + v.answered + ' answered',
+            selected: label === selected,
+            filterId: 'dash-f-country', filterValue: label,
+        }));
+    dashChartData.countries = items;
+    dashHBars(document.getElementById('dash-countries'), items, 'countries');
+}
+
+function dashRenderDevices(calls) {
+    const byD = { web: 0, sip: 0, unknown: 0 };
+    calls.forEach((c) => { byD[c.device] = (byD[c.device] || 0) + 1; });
+    const total = calls.length || 1;
+    const selected = document.getElementById('dash-f-dev').value;
+    const items = Object.entries(byD).filter(([, v]) => v > 0)
+        .sort((a, b) => b[1] - a[1])
+        .map(([dev, v]) => ({
+            label: escHtml(DASH_DEVICE_LABELS[dev] || dev),
+            value: v,
+            valueHtml: v + ' <span class="pct">· ' + Math.round(v * 100 / total) + '%</span>',
+            title: (DASH_DEVICE_LABELS[dev] || dev) + ': ' + v + ' calls',
+            selected: dev === selected,
+            filterId: 'dash-f-dev', filterValue: dev,
+        }));
+    dashChartData.devices = items;
+    dashHBars(document.getElementById('dash-devices'), items, 'devices');
+}
+
+function dashRenderTalk(calls) {
+    const byExt = {};
+    calls.forEach((c) => {
+        if (!c.ext || !c.billsec) return;
+        byExt[c.ext] = (byExt[c.ext] || 0) + c.billsec;
+    });
+    const selected = document.getElementById('dash-f-ext').value;
+    const items = Object.entries(byExt)
+        .sort((a, b) => b[1] - a[1]).slice(0, 12)
+        .map(([ext, sec]) => ({
+            label: escHtml(dashExtNames[ext] ? ext + ' · ' + dashExtNames[ext] : ext),
+            value: sec,
+            valueHtml: dashFmtHours(sec),
+            title: ext + ': ' + dashFmtDur(sec) + ' of talk time',
+            selected: ext === selected,
+            filterId: 'dash-f-ext', filterValue: ext,
+        }));
+    dashChartData.talk = items;
+    dashHBars(document.getElementById('dash-talk'), items, 'talk');
+}
+
+function dashSortBy(key) {
+    if (dashSort.key === key) dashSort.dir = -dashSort.dir;
+    else dashSort = { key, dir: key === 'start' || key === 'billsec' ? -1 : 1 };
+    dashRenderTable(dashFiltered());
+}
+
+function dashSortValue(c, key) {
+    if (key === 'country') return c.country ? c.country.label : '';
+    if (key === 'answered') return c.answered ? 1 : 0;
+    return c[key] == null ? '' : c[key];
+}
+
+function dashRenderTable(calls) {
+    document.querySelectorAll('#dash-table .arr').forEach((el) => { el.textContent = ''; });
+    const arrEl = document.getElementById('arr-' + dashSort.key);
+    if (arrEl) arrEl.textContent = dashSort.dir > 0 ? '▲' : '▼';
+
+    const sorted = [...calls].sort((a, b) => {
+        const va = dashSortValue(a, dashSort.key), vb = dashSortValue(b, dashSort.key);
+        if (va < vb) return -dashSort.dir;
+        if (va > vb) return dashSort.dir;
+        return 0;
+    });
+    const cap = 500;
+    const rows = sorted.slice(0, cap);
+    document.getElementById('dash-tbody').innerHTML = rows.length ? rows.map((c) => {
+        const user = c.ext ? escHtml(c.ext) + (c.extName ? ' <span style="color:#6b7080">' + escHtml(c.extName) + '</span>' : '') : '—';
+        const country = c.country ? c.country.flag + ' ' + escHtml(c.country.label) : '<span style="color:#6b7080">—</span>';
+        const status = c.answered
+            ? '<span style="color:#4caf50">✓ Answered</span>'
+            : '<span style="color:#8b8fa3">✕ Missed</span>';
+        return '<tr>' +
+            '<td>' + escHtml((c.start || '').slice(0, 16)) + '</td>' +
+            '<td>' + user + '</td>' +
+            '<td>' + (DASH_DIR_LABELS[c.direction] || escHtml(c.direction)) + '</td>' +
+            '<td>' + escHtml(c.phone || '') + '</td>' +
+            '<td>' + country + '</td>' +
+            '<td>' + escHtml(DASH_DEVICE_LABELS[c.device] || c.device) + '</td>' +
+            '<td>' + status + '</td>' +
+            '<td style="font-variant-numeric:tabular-nums">' + (c.answered ? dashFmtDur(c.billsec) : '—') + '</td>' +
+            '</tr>';
+    }).join('') : '<tr><td colspan="8" class="dash-empty">No calls match the current filters.</td></tr>';
+    document.getElementById('dash-table-foot').textContent =
+        calls.length > cap ? 'Showing ' + cap + ' of ' + calls.length + ' calls — use Export CSV for the full list.'
+        : (calls.length ? 'Showing ' + calls.length + ' calls' : '');
+}
+
+function dashExportCsv() {
+    const calls = dashFiltered();
+    const esc = (v) => { v = String(v == null ? '' : v); return /[",\n;]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+    const lines = [['start', 'extension', 'user_name', 'direction', 'number', 'country', 'device', 'answered', 'talk_sec', 'duration_sec', 'trunk', 'linkedid'].join(',')];
+    calls.forEach((c) => {
+        lines.push([c.start, c.ext, c.extName, c.direction, c.phone,
+            c.country ? c.country.label : '', DASH_DEVICE_LABELS[c.device] || c.device,
+            c.answered ? 'yes' : 'no', c.billsec, c.duration, c.trunk, c.linkedid].map(esc).join(','));
+    });
+    const blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'calls-dashboard.csv';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
 }
 
 // ==================== Init ====================
